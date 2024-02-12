@@ -8,5 +8,8 @@
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
 	<munit:config name="functional-tests.xml" doc:description="This test suite will test the basic functionality of each endpoint. Given a valid request, the endpoint returns the expected status code and response body."/>
+	<munit:test name="list-appointments-valid-request-response" doc:id="a791ece7-827c-417d-8f96-310882567dbc" doc:description="Given a valid request, the list appointments endpoint will return the expected response and status code."/>
+	<munit:test name="post-appointment-valid-request-response" doc:id="98b014c0-d54f-4085-b056-d52bcd7f4241" doc:description="Given a valid request, the post appointment endpoint will return the expected response and status code."/>
+	<munit:test name="delete-appointment-valid-request-response" doc:id="9a45c410-81dc-474c-9b26-a5c1f9c67248" doc:description="Given a valid request, the delete appointment endpoint will return the expected response and status code."/>
 
 </mule>
