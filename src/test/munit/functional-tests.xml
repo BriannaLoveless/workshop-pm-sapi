@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xsi:schemaLocation="
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
-		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<munit:config name="functional-tests.xml" doc:description="This test suite will test the basic functionality of each endpoint. Given a valid request, the endpoint returns the expected status code and response body."/>
-	<munit:test name="list-appointments-valid-request-response" doc:id="a791ece7-827c-417d-8f96-310882567dbc" doc:description="Given a valid request, the list appointments endpoint will return the expected response and status code."/>
+	<http:request-config name="MUNIT_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a27a950d-f415-4694-8983-89b0f21fa78c" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<munit:test name="list-appointments-valid-request-response" doc:id="a791ece7-827c-417d-8f96-310882567dbc" doc:description="Given a valid request, the list appointments endpoint will return the expected response and status code.">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="listAppointmentsApiFlow" />
+			<munit:enable-flow-source value="listAppointmentsForPatient" />
+		</munit:enable-flow-sources>
+		<munit:execution >
+			<http:request method="GET" doc:name="GET /patients/{id}/appointments" doc:id="5aa368ad-9527-4e1b-a476-e67af9560b0c" config-ref="MUNIT_HTTP_Request_configuration" path="/patients/175/appointments"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="statusCode = 200" doc:id="362276e5-b9d7-4c23-a576-42fdc688e4cf" actual="#[attributes.statusCode]" expected="#[200]"/>
+			<munit-tools:assert-equals doc:name='payload type = "array"' doc:id="6bd6610b-506d-4172-aa62-5ae58d69813b" actual="#[typeOf(payload)]" expected="Array"/>
+		</munit:validation>
+	</munit:test>
 	<munit:test name="post-appointment-valid-request-response" doc:id="98b014c0-d54f-4085-b056-d52bcd7f4241" doc:description="Given a valid request, the post appointment endpoint will return the expected response and status code."/>
 	<munit:test name="delete-appointment-valid-request-response" doc:id="9a45c410-81dc-474c-9b26-a5c1f9c67248" doc:description="Given a valid request, the delete appointment endpoint will return the expected response and status code."/>
 

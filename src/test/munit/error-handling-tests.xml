@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xsi:schemaLocation="
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
-		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<munit:config name="error-handling-tests.xml" doc:description="This test suite is intended to test the error handling of each endpoint. Given and invalid request, the end point returns the appropriate status code and expected error response. "/>
+	<http:request-config name="MUNIT_HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="adc038b3-75f0-4ccb-bc8a-7573c85eaa09" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<munit:test name="list-appointments-invalid-patient-response" doc:id="dd9ba846-dca2-4213-afd1-6b74d532a4ac" expectedErrorType="HTTP:NOT_FOUND">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="listAppointmentsForPatient" />
+			<munit:enable-flow-source value="listAppointmentsApiFlow" />
+		</munit:enable-flow-sources>
+		<munit:execution >
+			<http:request method="GET" doc:name="GET /patients/{id}/appointments" doc:id="f7df164f-1d9a-44d4-9d6b-53e8d5900c89" config-ref="MUNIT_HTTP_Request_configuration1" path="/patients/999/appointments"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="status code = 404" doc:id="d90f54d0-8fff-4130-b517-bd66d3ecacce" actual="#[attributes.httpStatus]" expected="#[404]"/>
+		</munit:validation>
+	</munit:test>
 
 </mule>
