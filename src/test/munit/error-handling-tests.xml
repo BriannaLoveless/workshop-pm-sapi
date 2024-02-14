@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<http:request-config name="MUNIT_HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="adc038b3-75f0-4ccb-bc8a-7573c85eaa09" >
 		<http:request-connection host="localhost" port="8081" />
 	</http:request-config>
-	<munit:test name="list-appointments-invalid-patient-response" doc:id="dd9ba846-dca2-4213-afd1-6b74d532a4ac" expectedErrorType="HTTP:NOT_FOUND">
+	<munit:test name="list-appointments-returns-404-if-no-patient" doc:id="dd9ba846-dca2-4213-afd1-6b74d532a4ac" expectedErrorType="HTTP:NOT_FOUND">
 		<munit:enable-flow-sources >
 			<munit:enable-flow-source value="listAppointmentsForPatient" />
 			<munit:enable-flow-source value="listAppointmentsApiFlow" />
@@ -24,7 +24,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			<munit-tools:assert-that doc:name="statusCode = 404" doc:id="f1aab51d-f0ff-42e7-a0c3-752e2f8cf71e" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]"/>
 		</munit:validation>
 	</munit:test>
-	<munit:test name="delete-appointment-invalid-appointment-response" doc:id="77f8348f-0810-4eec-aa9b-abaf3494748d" expectedErrorType="HTTP:NOT_FOUND">
+	<munit:test name="delete-appointment-returns-404-if-no-appointment" doc:id="77f8348f-0810-4eec-aa9b-abaf3494748d" expectedErrorType="HTTP:NOT_FOUND">
 		<munit:enable-flow-sources >
 			<munit:enable-flow-source value="deleteAppointmentsApiFlow" />
 			<munit:enable-flow-source value="deleteAppointment" />
