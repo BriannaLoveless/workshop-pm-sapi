@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
-	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
 		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<munit:config name="functional-tests.xml" doc:description="This test suite will test the basic functionality of each endpoint. Given a valid request, the endpoint returns the expected status code and response body."/>
 	<http:request-config name="MUNIT_HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a27a950d-f415-4694-8983-89b0f21fa78c" >
 		<http:request-connection host="localhost" port="8081" />
@@ -25,7 +26,75 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			<munit-tools:assert-that doc:name="payload is not null" doc:id="7af81614-35e3-4ec9-9269-847a4f3c524b" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
 		</munit:validation>
 	</munit:test>
-	<munit:test name="post-appointment-valid-request-response" doc:id="98b014c0-d54f-4085-b056-d52bcd7f4241" doc:description="Given a valid request, the post appointment endpoint will return the expected response and status code."/>
-	<munit:test name="delete-appointment-valid-request-response" doc:id="9a45c410-81dc-474c-9b26-a5c1f9c67248" doc:description="Given a valid request, the delete appointment endpoint will return the expected response and status code."/>
+	<munit:test name="post-appointment-valid-request-response" doc:id="98b014c0-d54f-4085-b056-d52bcd7f4241" doc:description="Given a valid request, the post appointment endpoint will return the expected response and status code.">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="createAppointment" />
+			<munit:enable-flow-source value="postAppointmentApiFlow" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="insert appointment into db" doc:id="8b3709f2-3183-4602-a598-87d48a70909e" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="appointment" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="4ef4dacd-7791-4763-a893-6c727261aedb" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="practiceMgmtDbConfig" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="insertResult" value="#[{affectedRows: 1, generatedKeys: {GENERATED_KEY: 123}}]" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<ee:transform doc:name="Sample Request Body" doc:id="d07087c5-32b8-4bc4-8966-7e4b4cb11329" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	appointment: {
+		start: "2024-05-14 00:00:00",
+		description: "Vaccine",
+		patient: {
+			id: 425
+		},
+		facility: {
+			id: 116
+		}
+	}
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="POST" doc:name="POST /appointments" doc:id="3fae93f7-6b04-43e7-851a-660f2bd529b8" config-ref="MUNIT_HTTP_Request_configuration" path="/appointments">
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="statusCode = 200" doc:id="320b1656-939c-4c7e-b094-888188cce8ae" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]"/>
+			<munit-tools:assert-that doc:name="payload.id = 123" doc:id="ce1ee6a2-ab57-4b29-9694-feadf97b3578" expression="#[payload.id]" is="#[MunitTools::equalTo(123)]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="delete-appointment-valid-request-response" doc:id="9a45c410-81dc-474c-9b26-a5c1f9c67248" doc:description="Given a valid request, the delete appointment endpoint will return the expected response and status code.">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="deleteAppointmentsApiFlow" />
+			<munit:enable-flow-source value="deleteAppointment" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="update db" doc:id="aac334c8-dabd-40e7-af38-a5da558e6af6" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="appointment" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="4c735450-3d73-4fa1-b955-68c0756b79cb" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{affectedRows: 1, generatedKeys: {GENERATED_KEY: 123}}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<http:request method="DELETE" doc:name="DELETE /appointments/{id}" doc:id="b584ca60-a89e-4736-bd3d-6a8e538a0bb2" config-ref="MUNIT_HTTP_Request_configuration" path="/appointments/999"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="statusCode = 200" doc:id="6abbec04-9153-44ac-b6eb-568cdb4284a5" is="#[MunitTools::equalTo(200)]" expression="#[attributes.statusCode]"/>
+		</munit:validation>
+	</munit:test>
 
 </mule>
