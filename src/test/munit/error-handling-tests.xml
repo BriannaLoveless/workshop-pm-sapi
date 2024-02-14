@@ -21,7 +21,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			<http:request method="GET" doc:name="GET /patients/{id}/appointments" doc:id="f7df164f-1d9a-44d4-9d6b-53e8d5900c89" config-ref="MUNIT_HTTP_Request_configuration1" path="/patients/999/appointments"/>
 		</munit:execution>
 		<munit:validation >
-			<munit-tools:assert-equals doc:name="status code = 404" doc:id="d90f54d0-8fff-4130-b517-bd66d3ecacce" actual="#[attributes.httpStatus]" expected="#[404]"/>
+			<munit-tools:assert-that doc:name="statusCode = 404" doc:id="f1aab51d-f0ff-42e7-a0c3-752e2f8cf71e" expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]"/>
 		</munit:validation>
 	</munit:test>
 

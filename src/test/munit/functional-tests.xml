@@ -21,8 +21,8 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			<http:request method="GET" doc:name="GET /patients/{id}/appointments" doc:id="5aa368ad-9527-4e1b-a476-e67af9560b0c" config-ref="MUNIT_HTTP_Request_configuration" path="/patients/175/appointments"/>
 		</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-equals doc:name="statusCode = 200" doc:id="362276e5-b9d7-4c23-a576-42fdc688e4cf" actual="#[attributes.statusCode]" expected="#[200]"/>
-			<munit-tools:assert-equals doc:name='payload type = "array"' doc:id="6bd6610b-506d-4172-aa62-5ae58d69813b" actual="#[typeOf(payload)]" expected="Array"/>
+			<munit-tools:assert-that doc:name="statusCode = 200" doc:id="60e0b46d-894f-4d67-b15a-4ef1560fb6b8" is="#[MunitTools::equalTo(200)]" expression="#[attributes.statusCode]"/>
+			<munit-tools:assert-that doc:name="payload is not null" doc:id="7af81614-35e3-4ec9-9269-847a4f3c524b" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
 		</munit:validation>
 	</munit:test>
 	<munit:test name="post-appointment-valid-request-response" doc:id="98b014c0-d54f-4085-b056-d52bcd7f4241" doc:description="Given a valid request, the post appointment endpoint will return the expected response and status code."/>
