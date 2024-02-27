@@ -19,11 +19,16 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			<munit:enable-flow-source value="listAppointmentsForPatient" />
 		</munit:enable-flow-sources>
 		<munit:execution >
-			<http:request method="GET" doc:name="GET /patients/{id}/appointments" doc:id="5aa368ad-9527-4e1b-a476-e67af9560b0c" config-ref="MUNIT_HTTP_Request_configuration" path="/patients/175/appointments"/>
+			<http:request method="GET" doc:name="GET /patients/{id}/appointments" doc:id="5aa368ad-9527-4e1b-a476-e67af9560b0c" config-ref="MUNIT_HTTP_Request_configuration" path="/patients/4/appointments"/>
 		</munit:execution>
 		<munit:validation>
+			<logger level="INFO" doc:name="Logger" doc:id="06129936-e5ae-4fa7-89f0-22ba369ed049" message="#[payload]"/>
 			<munit-tools:assert-that doc:name="statusCode = 200" doc:id="60e0b46d-894f-4d67-b15a-4ef1560fb6b8" is="#[MunitTools::equalTo(200)]" expression="#[attributes.statusCode]"/>
 			<munit-tools:assert-that doc:name="payload is not null" doc:id="7af81614-35e3-4ec9-9269-847a4f3c524b" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+			<munit-tools:assert-that doc:name="cancelled appointments are included in results" doc:id="1c0ba88e-3ffd-4e35-9efe-b7c5ff67b1d7" expression="#[payload.appointment.id filter $ == 836]" is="#[MunitTools::equalTo([836])]"/>
+			<foreach doc:name="For Each Patient" doc:id="04a23867-13d5-4218-95db-4133f6782d0e" collection="#[payload]">
+				<munit-tools:assert-that doc:name="all appointments are for the specified patient" doc:id="14862d08-4aec-4c1c-92d0-fcda9c038c3a" is='#[MunitTools::equalTo("4")]' expression="#[payload.patient.id]" />
+			</foreach>
 		</munit:validation>
 	</munit:test>
 	<munit:test name="post-appointment-returns-200-if-valid-request" doc:id="98b014c0-d54f-4085-b056-d52bcd7f4241" doc:description="Given a valid request, the post appointment endpoint will return the expected response and status code.">
